@@ -6,20 +6,30 @@
 
 var app = require('../app');
 var debug = require('debug')('expressjsssl:server');
-var http = require('http');
+
+// 1. Be sure to use "https" and not "http" here!
+var https = require('https');
+
+// 2. Required to read ssl cert
+const fs = require('fs');
+
+// 3. configure up your ssl options
+const sslOptions = {
+  key: fs.readFileSync("./ssl/server.key"),
+  cert: fs.readFileSync("./ssl/server.crt")
+}
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || '3001');
 app.set('port', port);
 
 /**
- * Create HTTP server.
+ * 4. Create HTTP server. Modify the original "var server = http.createServer(app);""
  */
-
-var server = http.createServer(app);
+var server = https.createServer(sslOptions, app);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -87,7 +97,7 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
 
-  const listeningMessage = 'Listening on http:localhost:' + port;
+  const listeningMessage = 'Listening on https:localhost:' + port;
   console.log(listeningMessage)
   debug('Listening on ' + bind);
 }
